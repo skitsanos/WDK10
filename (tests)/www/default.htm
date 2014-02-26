@@ -1,0 +1,235 @@
+﻿<!DOCTYPE html
+		PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+		"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>JsonBridge Example</title>
+    <meta property="og:title" content="Page name" />
+    <meta property="og:site_name" content="" />
+    <meta property="og:image" content="http://skitsanos.com/images/logo.png" />
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.16/jquery-ui.min.js"
+        type="text/javascript"></script>
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.10/themes/blitzer/jquery-ui.css"
+        type="text/css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Abel"/>
+    <script type="text/javascript" src="/libs/sha256.js"></script>
+    <script type="text/javascript" src="libs/json-min.js"></script>
+    <style type="text/css">
+        body {
+            font-family: Abel, serif;
+            font-size: 20px;
+        }
+
+        a {
+            cursor: pointer;
+            color: #ff9900;
+        }
+    </style>
+    <script type="text/javascript">
+        $(function () {
+
+            JsonBridge.useAuthorization = true;
+            JsonBridge.authorizationHandler = app.utils.setAuthorizationHanlder('admin', 'admin');
+
+            $('#buttonBrowseAssemblies').click(function () {
+                $('#listAssemblies').html(app.ui.loader);
+
+                JsonBridge.execute('_browse', null, null, function (data) {
+                    $('#listAssemblies').html('');
+
+                    if (data.type == "error") {
+                        $('#listAssemblies').html(data.message);
+                    } else {
+                        for (var i = 0, l = data.result.length; i < l; i++) {
+                            $('#listAssemblies').append(data.result[i] + '<br/>');
+                        }
+                    }
+
+                });
+            });
+
+            $('#buttonExecuteSimple').click(function () {
+                $('#resultSimple').html(app.ui.loader);
+
+                JsonBridge.execute('WDK.API.JsonBridge.Test', 'execute', null, function (data) {
+                    $('#resultSimple').html(data.result);
+                });
+            });
+
+            $('#buttonExecuteComplex').click(function () {
+                var params = ['my dummy parameter'];
+                JsonBridge.execute('WDK.API.JsonBridge.Test', 'executeWithParam', params, function (data) {
+                    $('#resultComplex').html(data.result);
+                });
+            });
+
+            $('#buttonExecuteReallyComplex').click(function () {
+                var params = ['my dummy parameter', { name: 'Evi', status: 200 }];
+                JsonBridge.execute('WDK.API.JsonBridge.Test', 'executeWithComplexParam', params, function (data) {
+                    $('#resultReallyComplex').html(data.result);
+                });
+            });
+
+            $('#buttonExecuteDateTime').click(function () {
+                $('#resultDateTime').html('Processing...');
+                var params = [new Date()];
+                JsonBridge.execute('WDK.API.JsonBridge.Test', 'executeDate', params, function (data) {
+                    //$('#resultDateTime').html(eval(data.result).toString());
+                    $('#resultDateTime').html('Date from server (added 22 days): ' + new Date(data.result));
+                }, function (fault) {
+                    console.log(fault);
+                });
+            });
+
+            $('#buttonExecuteLongNumber').click(function () {
+                var params = [9457720];
+                JsonBridge.execute('WDK.API.JsonBridge.Test', 'executeNumber', params, function (data) {
+                    $('#resultExecuteLongNumber').html('9457720 + 2000 = ' + data.result);
+                });
+            });
+
+            $('#buttonExecuteComplexParameter').click(function () {
+                var obj = [
+				{
+				    list: [
+						{
+						    name: 'Skitsanos',
+						    status: '403'
+						},
+						{
+						    name: 'Skitsanos Support',
+						    status: '200'
+						}
+				    ]
+				}
+                ];
+                var params = [obj];
+                JsonBridge.execute('WDK.API.JsonBridge.Test', 'executeComplexInput', params, function (data) {
+                    $('#resultExecuteComplexParameter').html(data.result);
+                });
+            });
+
+            $('#buttonGetDatasource').click(function () {
+                var params = ['my dummy parameter'];
+                JsonBridge.execute('WDK.API.JsonBridge.Test', 'getDatasource', params, function (data) {
+                    if (data.type == 'error') {
+                        $('#resultGetDatasource').html(data.stackTrace);
+                    }
+                    else {
+                        $('#resultGetDatasource').html(data.result[0].list.length);
+                    }
+
+                });
+            });
+        });
+
+        var JsonBridge = {
+            useAuthorization: false,
+            authorizationHandler: function (username, password) {
+                return "";
+            },
+
+            url: '/jsonbridge/',
+            execute: function (classpath, method, params, resultHandler, faultHandler) {
+                var url = JsonBridge.url + classpath + '/';
+                if (method != null && method != '')
+                    url += method;
+
+                if (params != null) {
+                    $.ajax({
+                        url: url,
+                        beforeSend: function (xhr) {
+                            if (JsonBridge.useAuthorization) {
+                                xhr.setRequestHeader("Authorization", JsonBridge.authorizationHandler);
+                            }
+                        },
+                        contentType: 'application/json',
+                        data: JSON.stringify(params),
+                        dataType: 'json',
+                        type: "POST",
+                        success: resultHandler,
+                        error: faultHandler
+                    });
+                }
+                else {
+                    $.ajax({
+                        url: url,
+                        beforeSend: function (xhr) {
+                            if (JsonBridge.useAuthorization) {
+                                xhr.setRequestHeader("Authorization", JsonBridge.authorizationHandler);
+                            }
+                        },
+                        contentType: 'application/json',
+                        dataType: 'json',
+                        processData: false,
+                        type: "GET",
+                        success: resultHandler,
+                        error: faultHandler
+                    });
+                }
+            }
+        };
+
+        var app =
+			{
+			    utils: {
+			        setAuthorizationHanlder: function (username, password) {
+			            return 'CouchDB ' + username + ':' + SHA256(password);
+			        },
+
+			        parseReply: function (reply) {
+			            if (reply.type == 'error') {
+			                return reply.message;
+			            } else {
+			                return reply.result;
+			            }
+			        }
+			    },
+
+			    ui: {
+			        loader: '<img src="/ajax-loader.gif" alt="Loading..." />'
+			    }
+			};
+
+    </script>
+</head>
+<body>
+    <ul>
+        <li><a id="buttonBrowseAssemblies">Browse Available Assemblies</a>
+            <div id="listAssemblies">
+            </div>
+        </li>
+        <li><a id="buttonExecuteSimple">Call simple parameter-less method</a>
+            <div id="resultSimple">
+            </div>
+        </li>
+        <li><a id="buttonExecuteComplex">Call method with simple parameter</a>
+            <div id="resultComplex">
+            </div>
+        </li>
+        <li><a id="buttonExecuteReallyComplex">Call method with multiple parameters</a>
+            <div id="resultReallyComplex">
+            </div>
+        </li>
+        <!-- really complicated things -->
+        <li><a id="buttonExecuteDateTime">Call method with DateTime parameter</a>
+            <div id="resultDateTime">
+            </div>
+        </li>
+        <li><a id="buttonExecuteLongNumber">Call method with Number parameter 9457720</a>
+            <div id="resultExecuteLongNumber">
+            </div>
+        </li>
+        <li><a id="buttonExecuteComplexParameter">Call method with complex parameter</a>
+            <div id="resultExecuteComplexParameter">
+            </div>
+        </li>
+        <li><a id="buttonGetDatasource">Call method with simple parameter and return List&lt;T&gt;</a>
+            <div id="resultGetDatasource">
+            </div>
+        </li>
+    </ul>
+</body>
+</html>

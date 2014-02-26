@@ -1,0 +1,32 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WDK.ContentManagement.Router", "WDK.ContentManagement.Router.csproj", "{3ED3108B-D6B9-434B-9FD5-18E2670B4426}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WDK.API.JsonBridge", "..\WDK.API.JsonBridge\WDK.API.JsonBridge.csproj", "{995FA460-47D4-4198-95E0-4787BF90F02B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Newtonsoft.Json", "..\..\..\Codebank\dotnet\json\trunk\Src\Newtonsoft.Json\Newtonsoft.Json.csproj", "{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3ED3108B-D6B9-434B-9FD5-18E2670B4426}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3ED3108B-D6B9-434B-9FD5-18E2670B4426}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3ED3108B-D6B9-434B-9FD5-18E2670B4426}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3ED3108B-D6B9-434B-9FD5-18E2670B4426}.Release|Any CPU.Build.0 = Release|Any CPU
+		{995FA460-47D4-4198-95E0-4787BF90F02B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{995FA460-47D4-4198-95E0-4787BF90F02B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{995FA460-47D4-4198-95E0-4787BF90F02B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{995FA460-47D4-4198-95E0-4787BF90F02B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

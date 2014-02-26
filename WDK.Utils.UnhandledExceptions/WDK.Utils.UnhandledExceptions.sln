@@ -1,0 +1,58 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2012
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WDK.Utils.UnhandledExceptions", "WDK.Utils.UnhandledExceptions.csproj", "{91A90184-37D3-4A33-9BFB-E59D50C9EC87}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WDK.API.CouchDb", "..\WDK.API.CouchDb\WDK.API.CouchDb.csproj", "{6F8844C8-E250-4028-80A1-42C412643509}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Newtonsoft.Json", "..\..\..\Codebank\dotnet\json\trunk\Src\Newtonsoft.Json\Newtonsoft.Json.csproj", "{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}"
+EndProject
+Project("{E24C65DC-7377-472B-9ABA-BC803B73C61A}") = "http://jsonbridge.vpn", "http://jsonbridge.vpn", "{5F0ADA9D-0FCD-4D27-9F90-3103EA697466}"
+	ProjectSection(WebsiteProperties) = preProject
+		UseIISExpress = "false"
+		TargetFrameworkMoniker = ".NETFramework,Version%3Dv4.0"
+		ProjectReferences = "{91a90184-37d3-4a33-9bfb-e59d50c9ec87}|WDK.Utils.UnhandledExceptions.dll;{6F8844C8-E250-4028-80A1-42C412643509}|WDK.API.CouchDb.dll;{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}|Newtonsoft.Json.dll;"
+		Debug.AspNetCompiler.VirtualPath = "/jsonbridge.vpn"
+		Debug.AspNetCompiler.PhysicalPath = "..\(tests)\www\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\jsonbridge.vpn\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/jsonbridge.vpn"
+		Release.AspNetCompiler.PhysicalPath = "..\(tests)\www\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\jsonbridge.vpn\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		SlnRelativePath = "..\(tests)\www\"
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{91A90184-37D3-4A33-9BFB-E59D50C9EC87}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91A90184-37D3-4A33-9BFB-E59D50C9EC87}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91A90184-37D3-4A33-9BFB-E59D50C9EC87}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91A90184-37D3-4A33-9BFB-E59D50C9EC87}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6F8844C8-E250-4028-80A1-42C412643509}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6F8844C8-E250-4028-80A1-42C412643509}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6F8844C8-E250-4028-80A1-42C412643509}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6F8844C8-E250-4028-80A1-42C412643509}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A9AE40FF-1A21-414A-9FE7-3BE13644CC6D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5F0ADA9D-0FCD-4D27-9F90-3103EA697466}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F0ADA9D-0FCD-4D27-9F90-3103EA697466}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5F0ADA9D-0FCD-4D27-9F90-3103EA697466}.Release|Any CPU.ActiveCfg = Debug|Any CPU
+		{5F0ADA9D-0FCD-4D27-9F90-3103EA697466}.Release|Any CPU.Build.0 = Debug|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
