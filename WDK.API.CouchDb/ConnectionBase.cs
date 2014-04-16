@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Net.Mime;
 using System.Text;
 using System.Net;
 using System.IO;
@@ -169,82 +170,49 @@ namespace WDK.API.CouchDb
 
             var result = new ServerResponse();
 
-            if (response != null)
-            {
-                result.contentType = response.ContentType;
+	        if (response == null) return result;
+	        result.contentType = response.ContentType;
 
-                if (result.contentType.StartsWith("text") || result.contentType.Equals("application/json") ||
-                    result.contentType.Equals("application/javascript"))
-                {
-                    var encode = Encoding.GetEncoding("utf-8");
+	        if (isBinaryResult)
+	        {
+		        result.isBinaryResult = true;
 
-                    var buffer = new byte[32768];
-                    using (var ms = new MemoryStream())
-                    {
-                        while (true)
-                        {
-                            var responseStream = response.GetResponseStream(); 
+		        var buffer = new byte[32768];
+		        using (var ms = new MemoryStream())
+		        {
+			        while (true)
+			        {
+				        var responseStream = response.GetResponseStream();
+				        if (responseStream == null) continue;
+				        var read = responseStream.Read(buffer, 0, buffer.Length);
 
-                            if (responseStream == null) continue;
-                            var read = responseStream.Read(buffer, 0, buffer.Length);
+				        if (read <= 0)
+				        {
+					        result.contentBytes = ms.ToArray();
 
-                            if (read <= 0)
-                            {
-                                result.contentBytes = ms.ToArray();
+					        break;
+				        }
 
-                                break;
-                            }
+				        ms.Write(buffer, 0, read);
+			        }
+		        }
 
-                            ms.Write(buffer, 0, read);
-                        }
-                    }
+		        result.contentString = Convert.ToBase64String(result.contentBytes);
+	        }
+	        else
+	        {
+		        result.isBinaryResult = false;
+		        result.contentBytes = null;
 
-                    result.contentString = encode.GetString(result.contentBytes);
-                }
-                else
-                {
-                    if (isBinaryResult)
-                    {
-                        result.isBinaryResult = true;
+		        var encode = Encoding.GetEncoding("utf-8");
 
-                        var buffer = new byte[32768];
-                        using (var ms = new MemoryStream())
-                        {
-                            while (true)
-                            {
-                                var responseStream = response.GetResponseStream();
-                                if (responseStream == null) continue;
-                                var read = responseStream.Read(buffer, 0, buffer.Length);
+		        using (var reader = new StreamReader(response.GetResponseStream(), encode))
+		        {
+			        result.contentString = reader.ReadToEnd();
+		        }
+	        }
 
-                                if (read <= 0)
-                                {
-                                    result.contentBytes = ms.ToArray();
-
-                                    break;
-                                }
-
-                                ms.Write(buffer, 0, read);
-                            }
-                        }
-
-                        result.contentString = null;
-                    }
-                    else
-                    {
-                        result.isBinaryResult = false;
-                        result.contentBytes = null;
-
-                        var encode = Encoding.GetEncoding("utf-8");
-
-                        using (var reader = new StreamReader(response.GetResponseStream(), encode))
-                        {
-                            result.contentString = reader.ReadToEnd();
-                        }
-                    }
-                }
-            }
-
-            return result;
+	        return result;
         }
 
         protected ServerResponse doRequest(string url, string method, WebHeaderCollection headers, string postdata, string contenttype, bool isBinaryResult)
@@ -307,47 +275,45 @@ namespace WDK.API.CouchDb
 
             var result = new ServerResponse();
 
-            if (response != null)
-            {
-                result.contentType = response.ContentType;
+	        if (response == null) return result;
+	        result.contentType = response.ContentType;
 
-                if (isBinaryResult)
-                {
-                    var buffer = new byte[32768];
-                    using (var ms = new MemoryStream())
-                    {
-                        while (true)
-                        {
-                            var responseStream = response.GetResponseStream();
-                            if (responseStream == null) continue;
-                            var read = responseStream.Read(buffer, 0, buffer.Length);
+	        if (isBinaryResult)
+	        {
+		        var buffer = new byte[32768];
+		        using (var ms = new MemoryStream())
+		        {
+			        while (true)
+			        {
+				        var responseStream = response.GetResponseStream();
+				        if (responseStream == null) continue;
+				        var read = responseStream.Read(buffer, 0, buffer.Length);
 
-                            if (read <= 0)
-                            {
-                                result.contentBytes = ms.ToArray();
+				        if (read <= 0)
+				        {
+					        result.contentBytes = ms.ToArray();
 
-                                break;
-                            }
+					        break;
+				        }
 
-                            ms.Write(buffer, 0, read);
-                        }
-                    }
+				        ms.Write(buffer, 0, read);
+			        }
+		        }
 
-                    result.contentString = null;
-                }
-                else
-                {
-                    result.isBinaryResult = false;
-                    result.contentBytes = null;
+		        result.contentString = Convert.ToBase64String(result.contentBytes);
+	        }
+	        else
+	        {
+		        result.isBinaryResult = false;
+		        result.contentBytes = null;
 
-                    using (var reader = new StreamReader(response.GetResponseStream()))
-                    {
-                        result.contentString = reader.ReadToEnd();
-                    }
-                }
-            }
+		        using (var reader = new StreamReader(response.GetResponseStream()))
+		        {
+			        result.contentString = reader.ReadToEnd();
+		        }
+	        }
 
-            return result;
+	        return result;
         }
 
         #endregion
