@@ -23,10 +23,50 @@ To start, make sure you have included wdk.api.couchdb.dll into your Project Refe
 using WDK.API.CouchDB;
 ```
 
+Now you can create your CouchDB client instance:
 
-####Database
+```csharp
+var couchdb = new Database();
+```
 
-######GetDatabases
 
+####Database Management
+
+######Get Databases
+
+```csharp
+var dbs = couchdb.getDatabases();
+```
+
+######Check if Database exists
+
+```csharp
+bool isExists = couchdb.databaseExists(DB_NAME);
+```
+
+Where _DB_NAME_ is the name of the database you want to check on existence.
+
+######Create Database
+
+```csharp
+bool created = couchdb.createDatabase(DB_NAME);
+```
+
+Where _DB_NAME_ is the name of the database you want to create. Returns _true_ if database was created successfully, otherwise _false_.
+
+######Delete Database
+
+```csharp
+bool deleted = couchdb.deleteDatabase(DB_NAME);
+```
+
+Where _DB_NAME_ is the name of the database you want to delete. Returns _true_ if database was deleted successfully, otherwise it will throw _InvalidServerResponseException_.
 
 ####Data documents
+
+######Get All Documents
+Get information on all the documents in the given database.
+
+```csharp
+List<DocumentInfo> docs = couchdb.getAllDocuments(DB_NAME);
+```
