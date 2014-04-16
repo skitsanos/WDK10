@@ -1,8 +1,8 @@
-﻿/*
+/*
 ** JSON Bridge Http Handler for WDK Content Router
 **
 ** @author skitsanos (info@skitsanos.com)
-** @version 1.0
+** @version 1.6
 */
 using System;
 using System.Collections.Generic;
@@ -24,7 +24,7 @@ namespace WDK.API.JsonBridge
 
 		public string classpath;
 		public string method;
-		
+
 		#endregion
 
 		#region " ProcessRequest "
@@ -36,41 +36,41 @@ namespace WDK.API.JsonBridge
 
 			var execTimeNow = new TimeSpan(DateTime.Now.Ticks);
 
-			if (bool.Parse(GetWebConfigValue("jsonbridge.AuthEnabled").ToString()) && String.IsNullOrEmpty(Request.Headers["Authorization"]))
+			if (bool.Parse(getWebConfigValue("jsonbridge.AuthEnabled").ToString()) && String.IsNullOrEmpty(Request.Headers["Authorization"]))
 			{
-				Response.Write(JsonConvert.SerializeObject(new InvokationErrorType() { message = "Authorization failed. No Authorization HTTP headers sent", execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds) }));
+				Response.Write(JsonConvert.SerializeObject(new InvokationErrorType { message = "Authorization failed. No Authorization HTTP headers sent", execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds) }));
 				return;
 			}
 
-		    if (bool.Parse(GetWebConfigValue("jsonbridge.AuthEnabled").ToString()) && !String.IsNullOrEmpty(Request.Headers["Authorization"]))
-		    {
-		        var authHeader = Request.Headers["Authorization"];
-		        var authMethod = Request.Headers["Authorization"].Split(' ')[0].ToLower();
+			if (bool.Parse(getWebConfigValue("jsonbridge.AuthEnabled").ToString()) && !String.IsNullOrEmpty(Request.Headers["Authorization"]))
+			{
+				var authHeader = Request.Headers["Authorization"];
+				var authMethod = Request.Headers["Authorization"].Split(' ')[0].ToLower();
 
-		        var assembly = Assembly.LoadFile(AppDomain.CurrentDomain.BaseDirectory + "bin\\JBAP." + authMethod + ".dll");
-		        var type = assembly.GetType("JBAP." + authHeader.Split(' ')[0]);
-		        if (type == null)
-		        {
-		            Response.Write(JsonConvert.SerializeObject(new InvokationErrorType()
-		                {
-		                    message = "Authorization failed. Wrong Authorization handler name",
-		                    execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds)
-		                }));
-		            return;
-		        }
-		        var obj = Activator.CreateInstance(type);
-		        var jbapClassName = authHeader.Split(' ')[0];
-		        var validateArgs = authHeader.Substring(jbapClassName.Length + 1);
-		        var validateResult = (bool)type.InvokeMember("validate", BindingFlags.Default | BindingFlags.InvokeMethod, null, obj, new object[] { validateArgs });
-			    if (validateResult) return;
-			    Response.Write(JsonConvert.SerializeObject(new InvokationErrorType()
-			    {
-				    message = "Authorization failed",
-				    execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds)
-			    }));
-			    return;
-		    }
-		    if (context.Application["__assemblies"] == null)
+				var assembly = Assembly.LoadFile(AppDomain.CurrentDomain.BaseDirectory + "bin\\JBAP." + authMethod + ".dll");
+				var type = assembly.GetType("JBAP." + authHeader.Split(' ')[0]);
+				if (type == null)
+				{
+					Response.Write(JsonConvert.SerializeObject(new InvokationErrorType
+					{
+							message = "Authorization failed. Wrong Authorization handler name",
+							execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds)
+						}));
+					return;
+				}
+				var obj = Activator.CreateInstance(type);
+				var jbapClassName = authHeader.Split(' ')[0];
+				var validateArgs = authHeader.Substring(jbapClassName.Length + 1);
+				var validateResult = (bool)type.InvokeMember("validate", BindingFlags.Default | BindingFlags.InvokeMethod, null, obj, new object[] { validateArgs });
+				if (validateResult) return;
+				Response.Write(JsonConvert.SerializeObject(new InvokationErrorType
+				{
+					message = "Authorization failed",
+					execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds)
+				}));
+				return;
+			}
+			if (context.Application["__assemblies"] == null)
 			{
 				context.Application["__assemblies"] = browseAssemblies();
 			}
@@ -102,7 +102,7 @@ namespace WDK.API.JsonBridge
 					{
 						foreach (var assembly in loaddedAssemblies)
 						{
-						    foreach (var type in assembly.Value.GetTypes())
+							foreach (var type in assembly.Value.GetTypes())
 							{
 								listOfClasses.Add(type.FullName);
 							}
@@ -113,10 +113,10 @@ namespace WDK.API.JsonBridge
 						//Response.Write(ex.ToString() + "<hr/>");
 					}
 
-                    Response.ContentType = ContentTypes.JSON;
-					Response.Write(JsonConvert.SerializeObject(new InvokationResultType()
+					Response.ContentType = ContentTypes.JSON;
+					Response.Write(JsonConvert.SerializeObject(new InvokationResultType
 					{
-                        result = listOfClasses,
+						result = listOfClasses,
 						execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds)
 					}));
 					break;
@@ -149,232 +149,232 @@ namespace WDK.API.JsonBridge
 									return;
 								}
 
-							    if (Request.RequestType == "POST")
-							    {
-							        // Check if user actually sent any params by analizyng inout stream
-							        if (Request.InputStream.Length == 0)
-							        {
-							            Response.Write("Request body missing");
-							        }
-							        else
-							        {
-							            var stream = new StreamReader(Request.InputStream);
-							            var requestBody = stream.ReadToEnd();
+								if (Request.RequestType == "POST")
+								{
+									// Check if user actually sent any params by analizyng inout stream
+									if (Request.InputStream.Length == 0)
+									{
+										Response.Write("Request body missing");
+									}
+									else
+									{
+										var stream = new StreamReader(Request.InputStream);
+										var requestBody = stream.ReadToEnd();
 
-								        var jsonSettings = new JsonSerializerSettings
-									        {
+										var jsonSettings = new JsonSerializerSettings
+											{
 												DateTimeZoneHandling = DateTimeZoneHandling.Utc,
 												DateFormatHandling = DateFormatHandling.IsoDateFormat,
 												DateFormatString = "{0:s}",
 												DateParseHandling = DateParseHandling.DateTime
-									        };
+											};
 
-							            var invokeParams = JsonConvert.DeserializeObject<object[]>(requestBody, jsonSettings);
+										var invokeParams = JsonConvert.DeserializeObject<object[]>(requestBody, jsonSettings);
 
-							            for (var index = possibleMethods.Count - 1; index >= 0; index--)
-							            {
-							                if (possibleMethods[index].GetParameters().Length != invokeParams.Length)
-							                {
-							                    possibleMethods.RemoveAt(index);
-							                }
-							            }
-							            switch (possibleMethods.Count)
-							            {
-							                case 0:
-							                    Response.Write(JsonConvert.SerializeObject(new InvokationErrorType()
-							                        {
-							                            execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds),
-							                            message = "There is no overload of the method with the specified number of params"
-							                        }));
-							                    return;
-							                case 1:
-							                    {
-							                        var methodInfo = possibleMethods[0];
+										for (var index = possibleMethods.Count - 1; index >= 0; index--)
+										{
+											if (possibleMethods[index].GetParameters().Length != invokeParams.Length)
+											{
+												possibleMethods.RemoveAt(index);
+											}
+										}
+										switch (possibleMethods.Count)
+										{
+											case 0:
+												Response.Write(JsonConvert.SerializeObject(new InvokationErrorType()
+													{
+														execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds),
+														message = "There is no overload of the method with the specified number of params"
+													}));
+												return;
+											case 1:
+												{
+													var methodInfo = possibleMethods[0];
 
-							                        var correctParams = new List<object>();
+													var correctParams = new List<object>();
 
-							                        for (var index = 0; index < invokeParams.Length; index++)
-							                        {
-							                            if (invokeParams[index].GetType().FullName != "Newtonsoft.Json.Linq.JObject")
-							                            {
-							                                correctParams.Add(invokeParams[index]);
-							                            }
-							                            else
-							                            {
-							                                var paramType = methodInfo.GetParameters()[index].ParameterType;
+													for (var index = 0; index < invokeParams.Length; index++)
+													{
+														if (invokeParams[index].GetType().FullName != "Newtonsoft.Json.Linq.JObject")
+														{
+															correctParams.Add(invokeParams[index]);
+														}
+														else
+														{
+															var paramType = methodInfo.GetParameters()[index].ParameterType;
 
-							                                var serializer = new JsonSerializer();
+															var serializer = new JsonSerializer();
 
-							                                var o = serializer.Deserialize(new JTokenReader((JObject)invokeParams[index]), paramType);
+															var o = serializer.Deserialize(new JTokenReader((JObject)invokeParams[index]), paramType);
 
-							                                correctParams.Add(o);
-							                            }
-							                        }
+															correctParams.Add(o);
+														}
+													}
 
-							                        var invokeResult = invokeAssemblyMethod(classpath, methodInfo, correctParams.ToArray());
+													var invokeResult = invokeAssemblyMethod(classpath, methodInfo, correctParams.ToArray());
 
-							                        Response.ContentType = ContentTypes.JSON;
+													Response.ContentType = ContentTypes.JSON;
 
-							                        //Response.Write(JsonConvert.SerializeObject(invokeResult, new JavaScriptDateTimeConverter()));
-							                        var converters = new JsonConverterCollection
+													//Response.Write(JsonConvert.SerializeObject(invokeResult, new JavaScriptDateTimeConverter()));
+													var converters = new JsonConverterCollection
 							                            {
 							                                new StringEnumConverter(),
 							                                new IsoDateTimeConverter()
 							                            };
-							                        Response.Write(JsonConvert.SerializeObject(invokeResult, converters.ToArray()));
+													Response.Write(JsonConvert.SerializeObject(invokeResult, converters.ToArray()));
 
-							                    }
-							                    break;
-							                default:
-							                    {
-							                        //Response.Write("Before anything else");
-							                        //return;
-							                        //trying to build the possibly correct argument list for each overload
-							                        var correctFinalParams = new List<object>();
-							                        var debug = "";
-							                        for (var index = possibleMethods.Count - 1; index >= 0; index--)
-							                        {
-							                            var correctParams = new List<object>();
-							                            var validParams = true;
-							                            //try to deserialize each possible type. if it fucks up, it's clearly not the overload we're looking for
-							                            //Response.Write("Before the loop");
-							                            //return;
+												}
+												break;
+											default:
+												{
+													//Response.Write("Before anything else");
+													//return;
+													//trying to build the possibly correct argument list for each overload
+													var correctFinalParams = new List<object>();
+													var debug = "";
+													for (var index = possibleMethods.Count - 1; index >= 0; index--)
+													{
+														var correctParams = new List<object>();
+														var validParams = true;
+														//try to deserialize each possible type. if it fucks up, it's clearly not the overload we're looking for
+														//Response.Write("Before the loop");
+														//return;
 
-							                            for (var index2 = 0; index2 < invokeParams.Length; index2++)
-							                            {
-							                                debug += "Front of the loop; ";
-							                                //return;
-							                                if (invokeParams[index2].GetType().FullName != "Newtonsoft.Json.Linq.JObject")
-							                                {
-							                                    correctParams.Add(invokeParams[index2]);
-							                                    debug += "Added normal type to param arr; ";
-							                                }
-							                                else
-							                                {
-							                                    var paramType = possibleMethods[index].GetParameters()[index2].ParameterType;
-							                                    debug += "Proceeding to deserialize from " + paramType.ToString() + "; ";
-							                                    var serializer = new JsonSerializer();
-							                                    // Response.Write(debug);
-							                                    // return;
-							                                    var o = serializer.Deserialize(new JTokenReader((JObject)invokeParams[index2]), paramType);
-							                                    debug += "Done serializing; ";
-							                                    if (o == null)
-							                                    {
-							                                        //couldn't deserialize to this type, so it's not the good overload
-							                                        validParams = false;
-							                                        debug += "Failed serializing; ";
-							                                        break;
-							                                    }
-							                                    correctParams.Add(o);
+														for (var index2 = 0; index2 < invokeParams.Length; index2++)
+														{
+															debug += "Front of the loop; ";
+															//return;
+															if (invokeParams[index2].GetType().FullName != "Newtonsoft.Json.Linq.JObject")
+															{
+																correctParams.Add(invokeParams[index2]);
+																debug += "Added normal type to param arr; ";
+															}
+															else
+															{
+																var paramType = possibleMethods[index].GetParameters()[index2].ParameterType;
+																debug += "Proceeding to deserialize from " + paramType.ToString() + "; ";
+																var serializer = new JsonSerializer();
+																// Response.Write(debug);
+																// return;
+																var o = serializer.Deserialize(new JTokenReader((JObject)invokeParams[index2]), paramType);
+																debug += "Done serializing; ";
+																if (o == null)
+																{
+																	//couldn't deserialize to this type, so it's not the good overload
+																	validParams = false;
+																	debug += "Failed serializing; ";
+																	break;
+																}
+																correctParams.Add(o);
 
 
-							                                }
-							                                debug += "End of the loop; ";
-							                            }
-							                            //Response.Write(debug);
-							                            //return;
-							                            if (!validParams)
-							                            {
-							                                possibleMethods.RemoveAt(index);
-							                                debug += "Not a valid overload; ";
-							                                continue;
-							                            }
+															}
+															debug += "End of the loop; ";
+														}
+														//Response.Write(debug);
+														//return;
+														if (!validParams)
+														{
+															possibleMethods.RemoveAt(index);
+															debug += "Not a valid overload; ";
+															continue;
+														}
 
-							                            var curMethodParamInfoArr = possibleMethods[index].GetParameters();
-							                            var curMethodTypeArr = curMethodParamInfoArr.Select(param => param.ParameterType).ToList();
+														var curMethodParamInfoArr = possibleMethods[index].GetParameters();
+														var curMethodTypeArr = curMethodParamInfoArr.Select(param => param.ParameterType).ToList();
 
-							                            //since all complex types are ok now, we've gotta check whether all types are matching. If they do, it's a valid overload
-							                            for (var index2 = 0; index2 < curMethodTypeArr.Count; index2++)
-							                            {
-							                                debug += "Checking " + correctParams[index2].GetType().ToString() + " and " + curMethodTypeArr[index2].ToString() + ": ";
-							                                if (correctParams[index2].GetType() == curMethodTypeArr[index2])
-							                                {
-							                                    debug += "equal; ";
-							                                }
-							                                else if ((correctParams[index2].GetType() == Type.GetType("System.Int64")) && isValidInt32(Int64.Parse(correctParams[index2].ToString())) && (curMethodTypeArr[index2] == Type.GetType("System.Int32")))
-							                                {
-							                                    debug += "Could cast from Int64 to Int32;";
-							                                }
-							                                else
-							                                {
+														//since all complex types are ok now, we've gotta check whether all types are matching. If they do, it's a valid overload
+														for (var index2 = 0; index2 < curMethodTypeArr.Count; index2++)
+														{
+															debug += "Checking " + correctParams[index2].GetType() + " and " + curMethodTypeArr[index2] + ": ";
+															if (correctParams[index2].GetType() == curMethodTypeArr[index2])
+															{
+																debug += "equal; ";
+															}
+															else if ((correctParams[index2].GetType() == Type.GetType("System.Int64")) && isValidInt32(Int64.Parse(correctParams[index2].ToString())) && (curMethodTypeArr[index2] == Type.GetType("System.Int32")))
+															{
+																debug += "Could cast from Int64 to Int32;";
+															}
+															else
+															{
 
-							                                    debug += "different; ";
-							                                    validParams = false;
-							                                    break;
-							                                }
-							                            }
+																debug += "different; ";
+																validParams = false;
+																break;
+															}
+														}
 
-							                            if (!validParams)
-							                            {
-							                                possibleMethods.RemoveAt(index);
-							                                debug += "Not a valid overload; ";
-							                                continue;
-							                            }
-							                            correctFinalParams = correctParams;
+														if (!validParams)
+														{
+															possibleMethods.RemoveAt(index);
+															debug += "Not a valid overload; ";
+															continue;
+														}
+														correctFinalParams = correctParams;
 
-							                        }
-							                        //Response.Write(debug);
-							                        //return;
-							                        if (possibleMethods.Count == 0)
-							                        {
-							                            Response.Write("No valid overload afterall.");
-							                        }
-							                        else if (possibleMethods.Count >= 2)
-							                        {
-							                            Response.Write(JsonConvert.SerializeObject(new InvokationErrorType()
-							                                {
-							                                    execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds),
-							                                    message = "Ambiguous call: " + possibleMethods.Count + " valid overloads"
-							                                }));
-							                        }
-							                        else
-							                        {
-							                            var invokeResult = invokeAssemblyMethod(classpath, possibleMethods[0], correctFinalParams.ToArray());
+													}
+													//Response.Write(debug);
+													//return;
+													if (possibleMethods.Count == 0)
+													{
+														Response.Write("No valid overload afterall.");
+													}
+													else if (possibleMethods.Count >= 2)
+													{
+														Response.Write(JsonConvert.SerializeObject(new InvokationErrorType()
+															{
+																execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds),
+																message = "Ambiguous call: " + possibleMethods.Count + " valid overloads"
+															}));
+													}
+													else
+													{
+														var invokeResult = invokeAssemblyMethod(classpath, possibleMethods[0], correctFinalParams.ToArray());
 
-							                            Response.ContentType = ContentTypes.JSON;
+														Response.ContentType = ContentTypes.JSON;
 
-							                            var converters = new JsonConverterCollection
+														var converters = new JsonConverterCollection
 							                                {
 							                                    new StringEnumConverter(),
 							                                    new IsoDateTimeConverter()
 							                                };
-							                            Response.Write(JsonConvert.SerializeObject(invokeResult, converters.ToArray()));
-							                        }
-							                    }
-							                    break;
-							            }
-							        }
-							    }
-							    else
-							    {
-							        var methodInfo = possibleMethods[0];
-							        if (methodInfo.GetParameters().Length > 0)
-							        {
-							            Response.Write(JsonConvert.SerializeObject(new InvokationErrorType()
-							                {
-							                    execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds),
-							                    message = "This method requires " + methodInfo.GetParameters().Length + " parameter(s)"
-							                }));
-							        }
-							        else
-							        {
-							            var invokeResult = invokeAssemblyMethod(classpath, methodInfo, null);
+														Response.Write(JsonConvert.SerializeObject(invokeResult, converters.ToArray()));
+													}
+												}
+												break;
+										}
+									}
+								}
+								else
+								{
+									var methodInfo = possibleMethods[0];
+									if (methodInfo.GetParameters().Length > 0)
+									{
+										Response.Write(JsonConvert.SerializeObject(new InvokationErrorType
+										{
+												execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds),
+												message = "This method requires " + methodInfo.GetParameters().Length + " parameter(s)"
+											}));
+									}
+									else
+									{
+										var invokeResult = invokeAssemblyMethod(classpath, methodInfo, null);
 
-							            var converters = new JsonConverterCollection
+										var converters = new JsonConverterCollection
 							                {
 							                    new StringEnumConverter(),
 							                    new JavaScriptDateTimeConverter()
 							                };
 
-							            Response.Write(JsonConvert.SerializeObject(invokeResult, converters.ToArray()));
-							        }
-							    }
+										Response.Write(JsonConvert.SerializeObject(invokeResult, converters.ToArray()));
+									}
+								}
 							}
 						}
 						else
 						{
 							// User specified wrong class path, should be valid type name
-							Response.Write(JsonConvert.SerializeObject(new InvokationErrorType()
+							Response.Write(JsonConvert.SerializeObject(new InvokationErrorType
 							{
 								execTime = (new TimeSpan(DateTime.Now.Ticks - execTimeNow.Ticks).TotalSeconds),
 								message = "Invalid class path: " + classpath
@@ -523,7 +523,7 @@ namespace WDK.API.JsonBridge
 				{
 					foreach (var type in assembly.Value.GetTypes())
 					{
-						if (type.FullName.ToLower() == classpath.ToLower())
+						if (String.Equals(type.FullName, classpath, StringComparison.CurrentCultureIgnoreCase))
 						{
 							var methodInfo = type.GetMethod(method);
 
@@ -549,7 +549,7 @@ namespace WDK.API.JsonBridge
 
 		List<MethodInfo> getOverloadsByName(string classpath, string methodName)
 		{
-			List<MethodInfo> result = new List<MethodInfo>();
+			var result = new List<MethodInfo>();
 
 			foreach (var method in Type.GetType(classpath).GetMethods())
 			{
@@ -677,7 +677,7 @@ namespace WDK.API.JsonBridge
 										{
 											var serializer = new JsonSerializer();
 											var o = serializer.Deserialize(new JTokenReader((JToken)args[index]), paramType.ParameterType);
-											
+
 											args[index] = o;
 										}
 										break;
@@ -772,11 +772,7 @@ namespace WDK.API.JsonBridge
 
 		private static bool isValidInt32(Int64 x)
 		{
-			if (x >= Int32.MinValue && x <= Int32.MaxValue)
-			{
-				return true;
-			}
-			return false;
+			return x >= Int32.MinValue && x <= Int32.MaxValue;
 		}
 
 		#endregion
@@ -851,7 +847,7 @@ namespace WDK.API.JsonBridge
 
 		#region " GetWebConfigValue "
 
-		private static object GetWebConfigValue(string Key)
+		private static object getWebConfigValue(string Key)
 		{
 			var conf = WebConfigurationManager.OpenWebConfiguration(System.Web.Hosting.HostingEnvironment.ApplicationVirtualPath);
 
