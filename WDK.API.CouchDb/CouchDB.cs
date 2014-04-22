@@ -1,4 +1,4 @@
-﻿using Newtonsoft.Json;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using System;
@@ -744,6 +744,20 @@ namespace WDK.API.CouchDb
 
         #region " GetDocument "
 
+	    public object getDocument(string db, string docId)
+	    {
+			var result = doRequest(getUrl() + "/" + db + "/" + docId, "GET", false);
+
+		    if (!result.contentType.Contains("text/plain") && !result.contentType.Contains("application/json"))
+			    throw new InvalidServerResponseException("Invalid Server Response!", result);
+
+		    var serializer = new JsonSerializerSettings();
+		    serializer.Converters.Add(new JavaScriptDateTimeConverter());
+
+		    var ro = JsonConvert.DeserializeObject(result.contentString, serializer);
+		    return ro;
+	    }
+
         /// <summary>
         /// Get Document by its ID
         /// </summary>
@@ -751,28 +765,28 @@ namespace WDK.API.CouchDb
         /// <param name="db"></param>
         /// <param name="docid"></param>
         /// <returns></returns>
-        public T getDocument<T>(string db, string docid) where T : new()
-        {
-            var result = doRequest(getUrl() + "/" + db + "/" + docid, "GET", false);
+		//public T getDocument<T>(string db, string docid) where T : new()
+		//{
+		//	var result = doRequest(getUrl() + "/" + db + "/" + docid, "GET", false);
 
-            if (result.contentType.Contains("text/plain") || result.contentType.Contains("application/json"))
-            {
-                var serializer = new JsonSerializerSettings();
-                serializer.Converters.Add(new JavaScriptDateTimeConverter());
+		//	if (result.contentType.Contains("text/plain") || result.contentType.Contains("application/json"))
+		//	{
+		//		var serializer = new JsonSerializerSettings();
+		//		serializer.Converters.Add(new JavaScriptDateTimeConverter());
 
-                var ro = JsonConvert.DeserializeObject(result.contentString, serializer);
+		//		var ro = JsonConvert.DeserializeObject(result.contentString, serializer);
 
-                //ro.Remove("_id");
-                //ro.Remove("_rev");
+		//		//ro.Remove("_id");
+		//		//ro.Remove("_rev");
 
-                var doc = new T();
+		//		var doc = new T();
 
-                JsonConvert.PopulateObject(ro.ToString(), doc);
+		//		JsonConvert.PopulateObject(ro.ToString(), doc);
 
-                return doc;
-            }
-            throw new InvalidServerResponseException("Invalid Server Response!", result);
-        }
+		//		return doc;
+		//	}
+		//	throw new InvalidServerResponseException("Invalid Server Response!", result);
+		//}
 
         #endregion
 
@@ -1017,7 +1031,7 @@ namespace WDK.API.CouchDb
 
         public ServerResponse getInlineAttachment(string dbName, string docId, string attachmentName)
         {
-            var result = doRequest(getUrl() + "/" + dbName + "/" + docId + "/" + HttpUtility.UrlEncode(attachmentName), "GET", false);
+            var result = doRequest(getUrl() + "/" + dbName + "/" + docId + "/" + HttpUtility.UrlEncode(attachmentName), "GET", true);
 
             return result;
         }
